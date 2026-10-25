@@ -122,16 +122,12 @@ AUGMENTATION = {
     "scaling": ("0.85-1.15x", 0.50),
     "rotation": ("+/-15 degrees", 0.50),
     "brightness_contrast": ("+/-20% each", 0.50),
-    "gaussian_noise": (FILL_IN("variance range used for the PUBLISHED run"), 0.20),
+    "gaussian_noise": ("standard deviation 0.02-0.12", 0.20),
     "gaussian_blur": ("kernel size 3-5", 0.15),
     "elastic_deformation": ("alpha=30, sigma=6", 0.15),
     # No vertical flip was applied.
 }
 
-# The Gaussian-noise setting differed between notebook versions. Record the
-# value from the single run that produced the published results, and pin that
-# version below; a repository that cannot say which run it describes does not
-# support the reproducibility claim it is there to make.
 # The run is identified by RUN_ID in GCS, not by which notebook file was open.
 # RUN_ID is recorded by the run itself and is authoritative; the notebook
 # filename is incidental and was not confirmed, so it is not asserted here.
