@@ -1,0 +1,16 @@
+# Analysis and figures
+numpy>=1.26,<3
+pandas>=2.1
+scipy>=1.11
+scikit-image>=0.22
+matplotlib>=3.8
+pillow>=10.0          # TIFF writing with LZW compression
+pyarrow>=14.0          # the run stored tables as parquet
+pyyaml>=6.0
+
+# Training (not needed to reproduce the statistics or figures)
+# torch>=2.1
+# torchvision>=0.16
+# segmentation-models-pytorch>=0.3
+# transformers>=4.38
+# albumentations>=1.4

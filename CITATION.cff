@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: >-
+  Uncertainty-based referral for ovarian lesion segmentation
+  under cross-modality shift
+message: Anonymised for peer review. Citation details will be completed on acceptance.
+type: software
+authors:
+  - name: "Withheld for peer review"
+license: MIT

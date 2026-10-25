@@ -1,0 +1,106 @@
+# =====================================================================
+# TEMPLATE - REPLACE WITH YOUR ORIGINAL LOCKED FILE BEFORE RELEASE
+#
+# This reproduces the content of the locked analysis plan for reference,
+# but it is NOT the original file and will NOT hash to the value quoted
+# in the manuscript. Copy your original in over this one, then run
+# `python verify_hash.py` and confirm the hash matches.
+# =====================================================================
+
+title: >-
+  Uncertainty-based referral for ovarian lesion segmentation
+  under cross-modality shift
+locked_before: "Any inspection of the OTU_CEUS subset"
+
+ensemble:
+  architectures: [unet_resnet34, nnunet2d, segformer_b2]
+  seeds: [1337, 2337, 3337, 4337, 5337]
+  n_members: 15
+  combination: unweighted mean of member foreground probability maps
+  segmentation_threshold: 0.50
+  selection_rule: >-
+    No member is selected, weighted or excluded on the basis of held-out
+    or cross-modality performance.
+
+preprocessing:
+  resize: [384, 384]
+  padding: aspect-ratio preserving
+  normalisation: ImageNet mean and standard deviation
+
+outcomes:
+  primary: dice
+  secondary: [iou, hd95, nsd_3px, abs_relative_area_error]
+  distance_units: pixels   # physical spacing not published
+
+definitions:
+  major_failure: dice < 0.50
+  silent_failure: major failure with uncertainty below the referral threshold
+
+uncertainty:
+  primary: ensemble_disagreement       # 1 - mean pairwise Dice, binarised
+  secondary: ensemble_mean_entropy
+
+referral:
+  threshold: 0.3671
+  fitted_on: 2D validation split only
+  rule: Youden index (sensitivity + specificity - 1)
+  note: >-
+    Fixed before any CEUS image was read. Not re-fitted on test or
+    cross-modality data under any circumstances.
+
+subgroups:
+  morphology:
+    regular: single connected component and solidity >= 0.95
+    irregular: otherwise
+  relative_size:
+    definition: reference mask area as a proportion of image area
+    strata: tertiles with cut points derived from development data
+
+hypotheses:
+  - id: H1
+    statement: Mean Dice decreases from 2D ultrasound to CEUS
+    null_value: 0.0
+  - id: H2
+    statement: AUROC of uncertainty for major failure on CEUS exceeds chance
+    null_value: 0.50
+  - id: H3
+    statement: AUPRC of uncertainty for major failure on CEUS exceeds prevalence
+    null_value: observed CEUS major-failure prevalence
+  - id: H4
+    statement: Silent failure rate is higher on CEUS than on 2D ultrasound
+    null_value: 0.0
+  - id: H5
+    statement: Referral reduces the major failure rate among retained CEUS images
+    null_value: 0.0
+  - id: H6
+    statement: Mean uncertainty increases from 2D ultrasound to CEUS
+    null_value: 0.0
+
+statistics:
+  interval_method: percentile clustered bootstrap
+  resampling_unit: near-duplicate image group
+  n_bootstrap_primary: 2000
+  n_bootstrap_secondary: 500
+  minimum_attainable_p: 0.001
+  multiplicity: [holm_bonferroni, benjamini_hochberg]
+  alpha: 0.05
+  additional_tests:
+    - cluster-level permutation test for H1
+    - paired clustered bootstrap for differences in AUROC
+
+sensitivity_analyses:
+  alternative_failure_thresholds: [0.40, 0.60, 0.70]
+  alternative_uncertainty: ensemble_mean_entropy
+  exclude_category: Normal Ovary
+  design_effect:
+    iccs: [0.3, 0.6]
+    cluster_size: documented images per patient, per cohort
+
+exploratory_added_after_unlocking:
+  - relative equivalent-diameter error
+  - comparison of uncertainty measures
+  - ensemble size and composition ablation
+  - probability calibration
+note_on_exploratory: >-
+  Added after the locked results were examined. Reported as exploratory
+  and not corrected for multiplicity.
